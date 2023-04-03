@@ -5,7 +5,8 @@ import torchvision.transforms as tvf
 from .modules import InterestPointModule, CorrespondenceModule
 
 def warp_homography_batch(sources, homographies):
-    """Batch warp keypoints given homographies.
+    """
+    Batch warp keypoints given homographies. From https://github.com/TRI-ML/KP2D.
 
     Parameters
     ----------
