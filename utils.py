@@ -1,15 +1,13 @@
 import os
-import cv2
-import random
-import collections
 import torch
-import numpy as np
 
+import torchvision.transforms as transforms
 from functools import lru_cache
 
 @lru_cache(maxsize=None)
 def meshgrid(B, H, W, dtype, device, normalized=False):
-    """Create mesh-grid given batch size, height and width dimensions.
+    """
+    Create mesh-grid given batch size, height and width dimensions. From https://github.com/TRI-ML/KP2D.
 
     Parameters
     ----------
@@ -45,7 +43,8 @@ def meshgrid(B, H, W, dtype, device, normalized=False):
 
 @lru_cache(maxsize=None)
 def image_grid(B, H, W, dtype, device, ones=True, normalized=False):
-    """Create an image mesh grid with shape B3HW given image shape BHW
+    """
+    Create an image mesh grid with shape B3HW given image shape BHW. From https://github.com/TRI-ML/KP2D.
 
     Parameters
     ----------
@@ -76,38 +75,28 @@ def image_grid(B, H, W, dtype, device, ones=True, normalized=False):
     grid = torch.stack(coords, dim=1)  # B3HW
     return grid
 
-def warp_keypoints(keypoints, H):
-    """Warp keypoints given a homography
+def to_tensor_sample(sample, tensor_type='torch.FloatTensor'):
+    """
+    Casts the keys of sample to tensors. From https://github.com/TRI-ML/KP2D.
 
     Parameters
     ----------
-    keypoints: numpy.ndarray (N,2)
-        Keypoint vector.
-    H: numpy.ndarray (3,3)
-        Homography.
+    sample : dict
+        Input sample
+    tensor_type : str
+        Type of tensor we are casting to
 
     Returns
     -------
-    warped_keypoints: numpy.ndarray (N,2)
-        Warped keypoints vector.
+    sample : dict
+        Sample with keys cast as tensors
     """
-    num_points = keypoints.shape[0]
-    homogeneous_points = np.concatenate([keypoints, np.ones((num_points, 1))], axis=1)
-    warped_points = np.dot(homogeneous_points, np.transpose(H))
-    return warped_points[:, :2] / warped_points[:, 2:]
-
-def draw_keypoints(img_l, top_uvz, color=(255, 0, 0), idx=0):
-    """Draw keypoints on an image"""
-    vis_xyd = top_uvz.permute(0, 2, 1)[idx].detach().cpu().clone().numpy()
-    vis = img_l.copy()
-    cnt = 0
-    for pt in vis_xyd[:,:2].astype(np.int32):
-        x, y = int(pt[0]), int(pt[1])
-        cv2.circle(vis, (x,y), 1, color, -1)
-    return vis
+    transform = transforms.ToTensor()
+    sample['image'] = transform(sample['image']).type(tensor_type)
+    return sample
 
 def prepare_dirs(config):
-    for path in [config.ckpt_dir, config.logs_dir]:
+    for path in [config.ckpt_dir]:
         if not os.path.exists(path):
             os.makedirs(path)
 
