@@ -23,7 +23,7 @@ traindata_arg.add_argument('--num_workers', type=int, default=4,
                             help='# of subprocesses to use for data loading')
 traindata_arg.add_argument('--pin_memory', type=str2bool, default=True,
                             help='# of subprocesses to use for data loading')
-traindata_arg.add_argument('--shuffle', type=str2bool, default=False,
+traindata_arg.add_argument('--shuffle', type=str2bool, default=True,
                             help='Whether to shuffle the train and valid indices')
 traindata_arg.add_argument('--image_shape', type=tuple, default=(240, 320),
                             help='')
