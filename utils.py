@@ -1,5 +1,6 @@
 import os
 import torch
+import numpy as np
 
 import torchvision.transforms as transforms
 from functools import lru_cache
@@ -94,6 +95,26 @@ def to_tensor_sample(sample, tensor_type='torch.FloatTensor'):
     transform = transforms.ToTensor()
     sample['image'] = transform(sample['image']).type(tensor_type)
     return sample
+
+def warp_keypoints(keypoints, H):
+    """Warp keypoints given a homography
+
+    Parameters
+    ----------
+    keypoints: numpy.ndarray (N,2)
+        Keypoint vector.
+    H: numpy.ndarray (3,3)
+        Homography.
+
+    Returns
+    -------
+    warped_keypoints: numpy.ndarray (N,2)
+        Warped keypoints vector.
+    """
+    num_points = keypoints.shape[0]
+    homogeneous_points = np.concatenate([keypoints, np.ones((num_points, 1))], axis=1)
+    warped_points = np.dot(homogeneous_points, np.transpose(H))
+    return warped_points[:, :2] / warped_points[:, 2:]
 
 def prepare_dirs(config):
     for path in [config.ckpt_dir]:
